@@ -7,9 +7,9 @@ const router = Router();
 // Trip Create
 router.post('/', async (req, res) => {
     try {
-        const { name, destination, startDate, endDate, totalMembers } = req.body;
+        const { creatorName, name, destination, purpose, startDate, endDate, totalMembers } = req.body;
 
-        const trip = new Trip({ name, destination, startDate, endDate, totalMembers });
+        const trip = new Trip({ creatorName, name, destination, purpose, startDate, endDate, totalMembers });
         await trip.save();
 
         res.json({ id: trip._id });

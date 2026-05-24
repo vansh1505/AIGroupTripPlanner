@@ -2,6 +2,7 @@ import express, { json } from 'express';
 import dotenv from 'dotenv';
 import tripRoutes from './routes/trip.routes.js';
 import aiRoutes from './routes/ai.routes.js';
+import responseRoutes from './routes/response.routes.js';
 import { connectDB } from './config/db.js';
 import cors from 'cors';
 
@@ -14,6 +15,7 @@ app.use(cors({
 connectDB();
 
 app.use('/api/trips', tripRoutes);
+app.use('/api/trips', responseRoutes);
 app.use('/api/ai', aiRoutes);
 
 app.get('/', (req, res) => {
