@@ -12,7 +12,7 @@ const CreateTrip = () => {
   const [id, setId] = useState(null);
   const handleCreateTrip = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/api/trips`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/trips`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

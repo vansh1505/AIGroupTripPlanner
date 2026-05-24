@@ -15,7 +15,7 @@ const JoinTrip = () => {
       try {
 
         const res = await fetch(
-          `http://localhost:3000/api/trips/${id}`
+          `${import.meta.env.VITE_API_URL}/api/trips/${id}`
         )
 
         const data = await res.json()
