@@ -164,7 +164,7 @@ const LandingPage = () => {
           </span>
 
           <p className="text-on-surface-variant text-sm text-center md:text-right">
-            © {new Date().getFullYear()} Planora. Curated for the intentional traveler.
+            © {new Date().getFullYear()} Planora. Curated for group travelers.
           </p>
         </div>
       </footer>

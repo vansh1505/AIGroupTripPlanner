@@ -87,7 +87,6 @@ const tripSchema = new mongoose.Schema({
     },
     destination: {
         type: String,
-        required: true
     },
     startDate: {
         type: Date,

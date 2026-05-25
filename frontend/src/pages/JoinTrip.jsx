@@ -3,9 +3,17 @@ import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown from 'react-markdown'
 
 const phaseNames = ['The Vibe', 'Rhythm & Style', 'Logistics', 'Curations']
+
+const loadingSteps = [
+  "Analyzing everyone's vibe...",
+  "Curating top destinations...",
+  "Matching budget preferences...",
+  "Finding the perfect stays...",
+  "Finalizing your dream itinerary..."
+]
 
 const formatTripDate = (date) => {
   if (!date) return 'TBD'
@@ -18,12 +26,6 @@ const formatTripDate = (date) => {
     month: 'short',
     day: 'numeric',
   })
-}
-
-const getTripStatusLabel = (status) => {
-  if (!status) return 'Planning'
-
-  return status.charAt(0).toUpperCase() + status.slice(1)
 }
 
 // Helper components for UI consistency
@@ -72,7 +74,22 @@ const JoinTrip = () => {
   const { id } = useParams();
   const [currentStep, setCurrentStep] = useState(1)
   const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState('')
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false)
+  const [currentLoadingStep, setCurrentLoadingStep] = useState(0)
   const totalSteps = 4
+    const [imgSrc, setImgSrc] = useState(null)
+
+  const fetchImage = async (city) => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/city-image?city=${city}`);
+      const data = await response.json();
+      console.log('Fetched image URL:', data.image);
+      setImgSrc(data.image);
+    } catch (error) {
+      console.error('Error fetching image:', error);
+    }
+  };
 
   const [tripData, setTripData] = useState({
     creatorName: '',
@@ -92,9 +109,9 @@ const JoinTrip = () => {
       try {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/trips/${id}`)
         const data = await res.json();
-        setTripData({
-          ...data.trip,
-        });
+        setTripData(data.trip);
+        fetchImage(data.trip.destination);
+        console.log('Fetched trip details:', data);
       } catch (error) {
         console.error('Error fetching trip details:', error)
       }
@@ -106,6 +123,21 @@ const JoinTrip = () => {
 
   const handleSubmit = async () => {
     try {
+      setError('');
+      const payload = {
+        name: formData.name.trim(),
+        budget: formData.budget,
+        destinationType: formData.destTypes,
+        ageGroup: formData.ageGroup,
+        budgetFlexibility: formData.budgetFlex,
+        foodPreference: formData.foodPref,
+        travelStyle: formData.travelStyle,
+        transportPreference: formData.transport,
+        stayPreference: formData.stayPref,
+        activities: formData.activities,
+        tripPace: formData.tripPace,
+      };
+
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/trips/${id}/respond`,
         {
@@ -113,7 +145,7 @@ const JoinTrip = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(payload),
         }
       );
 
@@ -126,13 +158,19 @@ const JoinTrip = () => {
       console.log(data);
       setSubmitted(true);
       
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'Something went wrong.');
     }
   };
 
-
   const handleAISummary = async () => {
+    setIsGeneratingAI(true);
+    setCurrentLoadingStep(0);
+    const interval = setInterval(() => {
+      setCurrentLoadingStep((prev) => Math.min(prev + 1, loadingSteps.length - 1));
+    }, 1500);
+
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ai/${id}`, {
         method: 'POST',
@@ -149,10 +187,13 @@ const JoinTrip = () => {
 
       setTripData((prev) => ({
         ...prev,
-        aiRecommendation: data.aiRecommendation,
+        aiRecommendation: data.recommendation,
       }));
     } catch (error) {
       console.error('Error generating AI summary:', error);
+    } finally {
+      clearInterval(interval);
+      setIsGeneratingAI(false);
     }
   };
 
@@ -164,8 +205,8 @@ const JoinTrip = () => {
     ageGroup: '26-35',
     travelStyle: 'Luxury',
     tripPace: 'Balanced',
-    transport: ['Flight', 'Train'],
-    stayPref: ['Hotel'],
+    transport: 'Flight',
+    stayPref: 'Hotel',
     foodPref: 'Any',
     activities: ["Nightlife", "Trekking", "Shopping", "Camping", "Photography", "Relaxation", "Food Exploration"],
   })
@@ -186,6 +227,26 @@ const JoinTrip = () => {
   const nextStep = () => setCurrentStep((p) => Math.min(p + 1, totalSteps))
   const prevStep = () => setCurrentStep((p) => Math.max(p - 1, 1))
 
+  const handleNext = () => {
+    setError('');
+    if (currentStep === 1) {
+      if (!formData.name.trim()) {
+        setError('Please enter your name to continue.');
+        return;
+      }
+      
+      const alreadyResponded = tripData.responses?.some(
+        r => r.name?.toLowerCase() === formData.name.trim().toLowerCase()
+      );
+      
+      if (alreadyResponded) {
+        setError('A response with this name has already been submitted.');
+        return;
+      }
+    }
+    nextStep();
+  };
+
 
 
   if (!id) {
@@ -196,25 +257,106 @@ const JoinTrip = () => {
     return <div>Loading trip details...</div>
   }
 
+  if (isGeneratingAI) {
+    return (
+      <div className="text-on-surface font-body antialiased overflow-x-hidden min-h-screen flex flex-col relative">
+        <Navbar activePath="my-trips" />
+        <main className="grow pt-25 pb-24 px-5 md:px-16 max-w-7xl mx-auto w-full flex items-center justify-center">
+          <div className="glass-panel p-10 rounded-2xl max-w-md w-full border border-white/10 relative overflow-hidden bg-surface-container/50 backdrop-blur-xl">
+            <div className="absolute inset-0 bg-linear-to-br from-primary/10 to-transparent z-0" />
+            <div className="relative z-10 flex flex-col items-center">
+              <div className="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center mb-8 relative shadow-[0_0_30px_rgba(212,175,55,0.3)]">
+                <span className="material-symbols-outlined text-[32px] text-primary animate-pulse">
+                  auto_awesome
+                </span>
+                <div className="absolute inset-0 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+              </div>
+              <h2 className="font-display text-[24px] mb-8 text-white font-medium text-center">
+                Crafting Your Journey
+              </h2>
+              <div className="w-full space-y-4">
+                {loadingSteps.map((step, index) => {
+                  const isCompleted = index < currentLoadingStep;
+                  const isActive = index === currentLoadingStep;
+                  return (
+                    <motion.div 
+                      key={index}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ 
+                        opacity: isCompleted || isActive ? 1 : 0.3, 
+                        x: 0,
+                        scale: isActive ? 1.02 : 1
+                      }}
+                      className="flex items-center gap-4"
+                    >
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center border transition-colors duration-500 ${isCompleted ? 'bg-primary border-primary' : isActive ? 'border-primary' : 'border-white/20'}`}>
+                        {isCompleted ? (
+                          <span className="material-symbols-outlined text-[14px] text-black font-bold">check</span>
+                        ) : isActive ? (
+                          <div className="w-2 h-2 bg-primary rounded-full animate-ping" />
+                        ) : null}
+                      </div>
+                      <span className={`font-body text-sm ${isCompleted ? 'text-on-surface-variant' : isActive ? 'text-primary font-medium' : 'text-on-surface-variant/50'}`}>
+                        {step}
+                      </span>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   if (tripData.status === 'completed') {
     return (
       <div className="text-on-surface font-body antialiased overflow-x-hidden min-h-screen flex flex-col relative">
         <Navbar activePath="my-trips" />
         <main className="grow pt-25 pb-24 px-5 md:px-16 max-w-7xl mx-auto w-full flex items-center justify-center">
-          <div className="text-center">
+          <div className="text-center w-full max-w-4xl">
             <h1 className="font-display text-[32px] md:text-[40px] mb-4 text-white font-semibold md:font-bold tracking-tight">
-              Trip Planning Completed
+              {tripData.aiRecommendation ? 'Your Custom Itinerary' : 'Trip Planning Completed'}
             </h1>
             <p className="font-body text-lg text-on-surface-variant mb-6">
-              The trip details have been finalized based on everyone's preferences. Check your itinerary for the final plan!
+              {tripData.aiRecommendation ? 'Here is the magical plan curated just for your group!' : "The trip details have been finalized based on everyone's preferences. Check your itinerary for the final plan!"}
             </p>
             
             {tripData.aiRecommendation ? (
-              <ReactMarkdown>
-                {tripData.aiRecommendation}
-              </ReactMarkdown>
+              <div className="text-left bg-surface-container-low/50 backdrop-blur-md rounded-2xl p-8 md:p-12 border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.5)] relative overflow-hidden mt-8 mx-auto group hover:border-primary/30 transition-all duration-500">
+                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none">
+                   <span className="material-symbols-outlined text-[150px] text-primary">auto_awesome</span>
+                </div>
+                <div className="relative z-10 markdown-wrapper">
+                  <ReactMarkdown
+                    components={{
+                      h1: ({node, ...props}) => <h1 className="text-3xl font-display text-white mt-8 mb-6 font-bold tracking-tight" {...props} />,
+                      h2: ({node, ...props}) => <h2 className="text-2xl font-display text-primary mt-8 mb-4 font-semibold" {...props} />,
+                      h3: ({node, ...props}) => <h3 className="text-xl font-display text-white mt-6 mb-3 font-medium" {...props} />,
+                      p: ({node, ...props}) => <p className="text-on-surface-variant leading-relaxed mb-4 text-[15px]" {...props} />,
+                      ul: ({node, ...props}) => <ul className="list-disc list-outside space-y-2 text-on-surface-variant ml-6 mb-6" {...props} />,
+                      ol: ({node, ...props}) => <ol className="list-decimal list-outside space-y-2 text-on-surface-variant ml-6 mb-6" {...props} />,
+                      li: ({node, ...props}) => <li className="marker:text-primary/70 pl-2" {...props} />,
+                      strong: ({node, ...props}) => <strong className="text-white font-semibold" {...props} />,
+                      a: ({node, ...props}) => <a className="text-primary hover:underline" {...props} />,
+                    }}
+                  >
+                    {tripData.aiRecommendation}
+                  </ReactMarkdown>
+                </div>
+              </div>
             ) : (
-              <button className="px-6 py-3 bg-primary text-black rounded-lg font-medium" onClick={handleAISummary}>Generate AI Itinerary</button>
+              <button 
+                className="gold-gradient text-background px-8 py-4 rounded-lg font-body text-sm font-semibold uppercase tracking-wide inline-flex items-center gap-3 transition-all hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:-translate-y-1 active:scale-95 mt-4" 
+                onClick={handleAISummary}
+              >
+                Generate AI Itinerary
+                <span className="material-symbols-outlined text-[20px]">
+                  auto_awesome
+                </span>
+              </button>
             )}
           </div>
         </main>
@@ -250,9 +392,9 @@ const JoinTrip = () => {
             <div className="glass-panel rounded-xl p-6 transition-all hover:shadow-[inset_0_0_20px_rgba(212,175,55,0.03),0_4px_30px_rgba(0,0,0,0.2)] hover:border-primary/20">
               <div className="w-full h-32 rounded-lg mb-6 overflow-hidden relative border border-white/5">
                 <img
-                  alt="Kyoto Template"
+                  alt={tripData.destination || 'Destination Image'}
                   className="w-full h-full object-cover opacity-80"
-                  src="/kyoto-temple.png"
+                  src={imgSrc}
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent" />
                 <div className="absolute bottom-3 left-3 flex items-center gap-2">
@@ -273,7 +415,7 @@ const JoinTrip = () => {
                     Status
                   </span>
                   <span className="font-body text-[11px] font-semibold tracking-wider uppercase text-primary bg-primary/10 px-2.5 py-1 rounded-sm border border-primary/20">
-                    {getTripStatusLabel(tripData.status)}
+                    {tripData.status}
                   </span>
                 </div>
                 <div className="w-full bg-surface-container-high rounded-full h-1 mt-3 overflow-hidden">
@@ -388,12 +530,18 @@ const JoinTrip = () => {
                               Your Name
                             </label>
                             <input
-                              className="w-full bg-white/5 border border-white/10 text-on-surface px-4 py-3 rounded-lg font-body text-sm transition-all duration-300 focus:border-primary focus:shadow-[0_0_10px_rgba(212,175,55,0.1)] outline-none"
+                              className={`w-full bg-white/5 border ${error && currentStep === 1 ? 'border-red-500' : 'border-white/10'} text-on-surface px-4 py-3 rounded-lg font-body text-sm transition-all duration-300 focus:border-primary focus:shadow-[0_0_10px_rgba(212,175,55,0.1)] outline-none`}
                               type="text"
                               placeholder="Enter your name"
                               value={formData.name}
-                              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                              onChange={(e) => {
+                                setFormData({ ...formData, name: e.target.value })
+                                if (error) setError('');
+                              }}
                             />
+                            {error && currentStep === 1 && (
+                              <p className="text-red-400 text-xs font-body">{error}</p>
+                            )}
                           </div>
                           <div className="space-y-4">
                             <div className="flex justify-between items-center">
@@ -512,9 +660,9 @@ const JoinTrip = () => {
                               />
                               <ImageCard
                                 src="/style-balanced.png"
-                                label="Balanced"
-                                active={formData.travelStyle === 'Balanced'}
-                                onClick={() => setFormData({ ...formData, travelStyle: 'Balanced' })}
+                                label="Budget"
+                                active={formData.travelStyle === 'Budget'}
+                                onClick={() => setFormData({ ...formData, travelStyle: 'Budget' })}
                               />
                               <ImageCard
                                 src="/style-backpacking.png"
@@ -568,9 +716,9 @@ const JoinTrip = () => {
                                 return (
                                   <Chip
                                     key={id}
-                                    active={formData.transport.includes(id)}
+                                    active={formData.transport === id}
                                     onClick={() =>
-                                      toggleArrayItem('transport', id)
+                                      setFormData({ ...formData, transport: id })
                                     }
                                   >
                                     {opt}
@@ -589,14 +737,9 @@ const JoinTrip = () => {
                                 return (
                                   <Chip
                                     key={id}
-                                    active={formData.stayPref.includes(id)}
+                                    active={formData.stayPref === id}
                                     onClick={() =>
-                                      setFormData({
-                                        ...formData,
-                                        stayPref: formData.stayPref.includes(id)
-                                          ? formData.stayPref.filter((i) => i !== id)
-                                          : [...formData.stayPref, id],
-                                      })
+                                      setFormData({ ...formData, stayPref: id })
                                     }
                                   >
                                     {opt}
@@ -675,22 +818,30 @@ const JoinTrip = () => {
 
               {/* Navigation Footer */}
               <div className="mt-10 pt-6 border-t border-white/5 flex justify-between items-center">
-                <button
-                  onClick={prevStep}
-                  className={`px-6 py-3 rounded-lg font-body text-sm font-semibold text-on-surface-variant hover:text-white transition-colors flex items-center gap-2 ${currentStep === 1 ? 'invisible' : 'visible'
-                    }`}
-                >
-                  <span className="material-symbols-outlined text-[18px]">
-                    arrow_back
-                  </span>{' '}
-                  Back
-                </button>
-                <button
-                  onClick={
-                    currentStep === totalSteps
-                      ? handleSubmit
-                      : nextStep
-                  }
+                <div className="w-full flex flex-col gap-4">
+                  {error && currentStep === totalSteps && (
+                    <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg font-body text-sm flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[18px]">error</span>
+                      {error}
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center">
+                    <button
+                      onClick={prevStep}
+                      className={`px-6 py-3 rounded-lg font-body text-sm font-semibold text-on-surface-variant hover:text-white transition-colors flex items-center gap-2 ${currentStep === 1 ? 'invisible' : 'visible'
+                        }`}
+                    >
+                      <span className="material-symbols-outlined text-[18px]">
+                        arrow_back
+                      </span>{' '}
+                      Back
+                    </button>
+                    <button
+                      onClick={
+                        currentStep === totalSteps
+                          ? handleSubmit
+                          : handleNext
+                      }
                   className="gold-gradient text-background px-8 py-3 rounded-lg font-body text-sm font-semibold uppercase tracking-wide flex items-center gap-2 transition-all hover:shadow-[0_0_15px_rgba(212,175,55,0.4)] hover:-translate-y-0.5 active:scale-95"
                 >
                   {currentStep === totalSteps ? 'Manifest Journey' : 'Continue'}
@@ -701,6 +852,8 @@ const JoinTrip = () => {
                       : 'arrow_forward'}
                   </span>
                 </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

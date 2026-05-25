@@ -30,7 +30,8 @@ router.post('/:tripId/respond', async (req, res) => {
 
         const { name, budget, destinationType, ageGroup, budgetFlexibility, foodPreference, travelStyle, transportPreference, stayPreference, activities, tripPace } = req.body;
 
-        const alreadySubmitted = trip.responses.findIndex(r => r.name === name);
+        const trimmedName = name.trim().toLowerCase();
+        const alreadySubmitted = trip.responses.findIndex(r => r.name.trim().toLowerCase() === trimmedName);
 
         if (alreadySubmitted !== -1) {
             return res.status(400).json({

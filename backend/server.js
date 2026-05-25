@@ -2,6 +2,7 @@ import express, { json } from 'express';
 import dotenv from 'dotenv';
 import tripRoutes from './routes/trip.routes.js';
 import aiRoutes from './routes/ai.routes.js';
+import imageApiRoutes from './routes/imageApi.routes.js';
 import responseRoutes from './routes/response.routes.js';
 import { connectDB } from './config/db.js';
 import cors from 'cors';
@@ -17,6 +18,7 @@ connectDB();
 app.use('/api/trips', tripRoutes);
 app.use('/api/trips', responseRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api', imageApiRoutes);
 
 app.get('/', (req, res) => {
     res.json({ ping: 'pong' }).status(200);

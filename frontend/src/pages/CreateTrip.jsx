@@ -4,9 +4,8 @@ import { Link } from 'react-router-dom'
 
 const purposes = [
   { label: 'Friends Trip', icon: 'diversity_3' },
-  { label: 'Romance', icon: 'favorite' },
-  { label: 'Solo', icon: 'person' },
-  { label: 'Family', icon: 'luggage' },
+  { label: 'Family Vacation', icon: 'luggage' },
+  { label: 'Solo Travel', icon: 'person' },
   { label: 'Destination Wedding', icon: 'partner_exchange' },
   { label: 'Honeymoon', icon: 'beach_access' },
   { label: 'Business', icon: 'work' },
@@ -28,6 +27,7 @@ const fadeUp = {
 const CreateTrip = () => {
   const [purpose, setpurpose] = useState('')
   const [id, setId] = useState(null);
+  const [error, setError] = useState('')
   const [form, setForm] = useState({
     creatorName: '',
     name: '',
@@ -53,6 +53,7 @@ const CreateTrip = () => {
   e.preventDefault()
 
   try {
+    setError('')
     const response = await fetch(`${import.meta.env.VITE_API_URL}/api/trips`,
       {
         method: 'POST',
@@ -64,7 +65,13 @@ const CreateTrip = () => {
     )
 
     if (!response.ok) {
-      console.error('Failed to create trip:', response.statusText)
+      let errorMessage = 'Failed to create trip. Please check your inputs.'
+      try {
+        const errorData = await response.json()
+        errorMessage = errorData.message || errorMessage
+      } catch (e) {}
+      setError(errorMessage)
+      toast.error(errorMessage)
       return
     }
 
@@ -83,6 +90,7 @@ const CreateTrip = () => {
     
   } catch (error) {
     console.error('Error creating trip:', error.message)
+    setError('Failed to connect to the server. Please try again.')
   }
 }
 
@@ -209,14 +217,14 @@ const CreateTrip = () => {
                 required
                 value={form.destination}
                 onChange={(e) => setForm({...form, destination: e.target.value})}
-                placeholder="Destination"
+                placeholder="Leave blank to let AI recommend destinations based on your preferences"
                 className="peer w-full bg-transparent border-0 border-b border-outline-variant font-display text-2xl md:text-3xl text-on-surface py-4 placeholder-transparent focus:outline-none focus:ring-0 focus:border-primary transition-all duration-500"
               />
               <label
                 htmlFor="destination"
                 className="absolute left-0 top-4 font-display text-2xl md:text-3xl text-on-surface-variant transition-all duration-500 pointer-events-none peer-focus:-top-8 peer-focus:text-sm peer-focus:font-body peer-focus:font-semibold peer-focus:text-primary peer-focus:uppercase peer-focus:tracking-widest peer-[:not(:placeholder-shown)]:-top-8 peer-[:not(:placeholder-shown)]:text-sm peer-[:not(:placeholder-shown)]:font-body peer-[:not(:placeholder-shown)]:font-semibold peer-[:not(:placeholder-shown)]:text-on-surface-variant peer-[:not(:placeholder-shown)]:uppercase peer-[:not(:placeholder-shown)]:tracking-widest"
               >
-                Where to next?
+                Where to next? (Optional)
               </label>
 
               {/* Animated gold underline */}
@@ -266,11 +274,13 @@ const CreateTrip = () => {
                 <div className="relative group flex-1">
                   <input
                     id="start-date"
-                    type="text"
+                    type="date"
+                    required
+                    min={new Date().toISOString().split("T")[0]}
                     value={form.startDate}
                     onChange={(e) => setForm({ ...form, startDate: e.target.value })}
                     placeholder="Start Date"
-                    className="peer w-full bg-transparent border-0 border-b border-outline-variant font-display text-xl md:text-2xl text-on-surface py-4 placeholder-transparent focus:outline-none focus:ring-0 focus:border-primary transition-all duration-500"
+                    className="peer w-full bg-transparent border-0 border-b border-outline-variant font-display text-xl md:text-2xl text-on-surface py-4 placeholder-transparent focus:outline-none focus:ring-0 focus:border-primary transition-all duration-500 [color-scheme:dark]"
                   />
                   <label
                     htmlFor="start-date"
@@ -287,11 +297,13 @@ const CreateTrip = () => {
                 <div className="relative group flex-1">
                   <input
                     id="end-date"
-                    type="text"
+                    type="date"
+                    required
+                    min={form.startDate || new Date().toISOString().split("T")[0]}
                     value={form.endDate}
                     onChange={(e) => setForm({ ...form, endDate: e.target.value })}
                     placeholder="End Date"
-                    className="peer w-full bg-transparent border-0 border-b border-outline-variant font-display text-xl md:text-2xl text-on-surface py-4 placeholder-transparent focus:outline-none focus:ring-0 focus:border-primary transition-all duration-500"
+                    className="peer w-full bg-transparent border-0 border-b border-outline-variant font-display text-xl md:text-2xl text-on-surface py-4 placeholder-transparent focus:outline-none focus:ring-0 focus:border-primary transition-all duration-500 [color-scheme:dark]"
                   />
                   <label
                     htmlFor="end-date"
@@ -385,13 +397,23 @@ const CreateTrip = () => {
             </motion.div>
 
             {/* Submit Area */}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-red-500/10 border border-red-500/20 text-red-400 px-6 py-4 rounded-xl font-body text-sm flex items-center gap-3 mt-8"
+              >
+                <span className="material-symbols-outlined text-[20px]">error</span>
+                {error}
+              </motion.div>
+            )}
             <motion.div
               variants={fadeUp}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
-              className="mt-12 flex flex-col sm:flex-row items-center sm:justify-end gap-6 border-t border-white/5 pt-12"
+              className={`${error ? 'mt-4' : 'mt-12'} flex flex-col sm:flex-row items-center sm:justify-end gap-6 border-t border-white/5 pt-12`}
             >
               <span className="text-on-surface-variant/60 text-base hidden sm:block">
                 Press enter to continue
