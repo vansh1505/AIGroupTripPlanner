@@ -109,7 +109,7 @@ const tripSchema = new mongoose.Schema({
         enum: [
             'Friends Trip',
             'Family Vacation',
-            'Destination wedding',
+            'Destination Wedding',
             'Honeymoon',
             'Business',
             'Solo Travel',

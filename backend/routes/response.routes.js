@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
+import axios from 'axios';
 import Trip from '../schema/trip.schema.js';
 
 const router = Router();
@@ -27,8 +28,9 @@ router.post('/:tripId/respond', async (req, res) => {
             });
         }
 
-        const responseData = req.body;
-        const alreadySubmitted = trip.responses.findIndex(r => r.name === responseData.name);
+        const { name, budget, destinationType, ageGroup, budgetFlexibility, foodPreference, travelStyle, transportPreference, stayPreference, activities, tripPace } = req.body;
+
+        const alreadySubmitted = trip.responses.findIndex(r => r.name === name);
 
         if (alreadySubmitted !== -1) {
             return res.status(400).json({
@@ -36,10 +38,9 @@ router.post('/:tripId/respond', async (req, res) => {
             });
         }
 
-        trip.responses.push(responseData);
+        trip.responses.push({ name, budget, destinationType, ageGroup, budgetFlexibility, foodPreference, travelStyle, transportPreference, stayPreference, activities, tripPace });
 
         if (trip.responses.length >= trip.totalMembers) {
-            await axios.post(`${process.env.BACKEND_URL}/api/ai/${trip._id}`);
             trip.status = 'completed';
         }
 

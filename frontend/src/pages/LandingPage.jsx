@@ -1,149 +1,203 @@
-import React from 'react'
+import { useState, useEffect } from 'react'
+import { motion } from 'motion/react'
 import { Link } from 'react-router-dom'
 
+const FOOTER_LINKS = ['Destinations', 'Journal', 'Concierge', 'Privacy']
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0 },
+}
+
 const LandingPage = () => {
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 50)
+    window.addEventListener('scroll', onScroll)
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen overflow-x-hidden">
+      {/* ── Navbar ── */}
+      <nav
+        className={`fixed top-0 w-full z-50 backdrop-blur-xl border-b border-white/10 transition-colors duration-300 ${
+          scrolled ? 'bg-surface/80' : 'bg-surface/60'
+        }`}
+      >
+        <div className="flex justify-between items-center px-5 md:px-16 py-4 max-w-7xl mx-auto">
+          <span className="font-display text-primary text-2xl md:text-3xl font-bold tracking-tighter">
+            Planora
+          </span>
 
-      {/* Navbar */}
-      <nav className="flex items-center justify-between border-b pb-4">
-        <h1 className="text-2xl font-bold">Group Trip Planner</h1>
+          <div className="hidden md:flex gap-8 items-center">
+            {['Explore', 'My Trips'].map((item) => (
+              <a
+                key={item}
+                href="#"
+                className="text-on-surface-variant text-sm font-semibold uppercase tracking-widest hover:text-primary transition-colors"
+              >
+                {item}
+              </a>
+            ))}
+          </div>
 
-        <div className="flex gap-3">
-          <button className="border px-4 py-2 rounded-lg">
-            Login
-          </button>
-
-          <button className="border px-4 py-2 rounded-lg">
-            Sign Up
-          </button>
+          <Link to="/create-trip">
+            <button className="gold-gradient text-on-primary px-6 py-3 rounded-full text-sm font-semibold tracking-wide border-none cursor-pointer flex items-center gap-2 transition-all hover:shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:-translate-y-0.5 active:scale-95">
+              Start Planning
+              <span className="material-symbols-outlined text-lg">arrow_forward</span>
+            </button>
+          </Link>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="py-16 text-center">
-        <h2 className="text-5xl font-bold max-w-3xl mx-auto leading-tight">
-          Plan Trips With Friends Without The Usual Chaos
-        </h2>
+      {/* ── Hero ── */}
+      <section className="relative min-h-screen flex items-center justify-center animated-bg pt-24 px-5 md:px-16 overflow-hidden">
+        {/* Ambient glows */}
+        <div className="absolute inset-0 pointer-events-none opacity-40">
+          <div className="absolute top-1/4 left-10 w-64 h-64 rounded-full bg-primary/5 blur-[100px]" />
+          <div className="absolute bottom-1/4 right-10 w-96 h-96 rounded-full bg-secondary/5 blur-[120px]" />
+        </div>
 
-        <p className="mt-6 text-lg max-w-2xl mx-auto">
-          Create trips, invite friends, manage expenses, track plans,
-          and pretend your group can actually decide anything in under
-          three business days.
-        </p>
+        <div className="relative z-10 max-w-7xl mx-auto w-full text-center flex flex-col items-center">
+          {/* Badge */}
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="glass-panel inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8"
+          >
+            <span className="material-symbols-outlined text-primary text-base">auto_awesome</span>
+            <span className="text-on-surface-variant text-xs font-medium uppercase tracking-widest">
+              The Future of Travel Planning
+            </span>
+          </motion.div>
 
-        <div className="mt-8 flex justify-center gap-4">
-          <Link to="/create-trip">
-            <button className="border px-6 py-3 rounded-xl text-lg cursor-pointer">
-              Create Trip
+          {/* Headline */}
+          <motion.h1
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.1 }}
+            className="font-display font-bold text-on-surface text-[clamp(2.5rem,6vw,4rem)] leading-tight tracking-tight mb-6"
+          >
+            Travel Better,
+            <br />
+            <span className="text-gold-gradient italic">Together.</span>
+          </motion.h1>
+
+          {/* Subtitle */}
+          <motion.p
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="font-body text-on-surface-variant text-lg leading-relaxed max-w-2xl mx-auto mb-12"
+          >
+            Curate immersive, cinematic itineraries with AI precision. Collaborate
+            seamlessly with your inner circle to craft the perfect journey.
+          </motion.p>
+
+          {/* CTA Buttons */}
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="flex flex-col sm:flex-row gap-4"
+          >
+            <Link to="/create-trip">
+              <button className="gold-gradient text-on-primary px-8 py-4 rounded-full text-sm font-semibold tracking-wide border-none cursor-pointer flex items-center justify-center gap-2 transition-all hover:shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:-translate-y-0.5 active:scale-95">
+                Start Your Journey
+                <span className="material-symbols-outlined text-lg">flight_takeoff</span>
+              </button>
+            </Link>
+            <button className="glass-panel text-on-surface px-8 py-4 rounded-full text-sm font-semibold tracking-wide cursor-pointer flex items-center justify-center gap-2 transition-all hover:bg-white/10 active:scale-95">
+              Explore Destinations
             </button>
-          </Link>
+          </motion.div>
 
-          <button className="border px-6 py-3 rounded-xl text-lg">
-            Explore Trips
-          </button>
+          {/* Hero Image Showcase */}
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            className="mt-20 w-full max-w-5xl mx-auto relative"
+          >
+            {/* Outer glow */}
+            <div className="absolute -inset-1 rounded-2xl blur-xl opacity-50 bg-linear-to-r from-primary/20 to-secondary/20" />
+
+            {/* Image container */}
+            <div className="glass-elevated rounded-2xl overflow-hidden relative aspect-video">
+              <img
+                src="/hero-travel.png"
+                alt="Luxury Mediterranean coastline at golden hour"
+                className="absolute inset-0 w-full h-full object-cover opacity-80"
+              />
+
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-linear-to-t from-background via-background/20 to-transparent" />
+
+              {/* Trip info card */}
+              <div className="absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8 glass-panel rounded-xl p-4 md:p-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                  <h3 className="font-display text-on-surface text-2xl font-medium mb-1">
+                    Amalfi Coast Escape
+                  </h3>
+                  <p className="font-body text-on-surface-variant flex items-center gap-2">
+                    <span className="material-symbols-outlined text-base">calendar_today</span>
+                    Oct 12 - 18 • 4 Travelers
+                  </p>
+                </div>
+
+                {/* Avatars */}
+                <div className="flex -space-x-4">
+                  <div className="w-10 h-10 rounded-full border-2 border-surface bg-surface-container-high" />
+                  <div className="w-10 h-10 rounded-full border-2 border-surface bg-surface-container-high" />
+                  <div className="w-10 h-10 rounded-full border-2 border-surface bg-primary/20 flex items-center justify-center text-primary text-xs font-medium">
+                    +2
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="grid md:grid-cols-3 gap-6 py-10">
+      {/* ── Footer ── */}
+      <footer className="bg-surface-container-lowest py-12 border-t border-white/5 mt-32">
+        <div className="max-w-7xl mx-auto px-5 md:px-16 flex flex-col md:flex-row justify-between items-center gap-8">
+          <span className="font-display text-primary text-2xl font-medium tracking-tighter">
+            Planora
+          </span>
 
-        <div className="border rounded-2xl p-6">
-          <h3 className="text-2xl font-semibold mb-3">
-            Trip Management
-          </h3>
-
-          <p>
-            Organize destinations, dates, members, and schedules
-            without using twenty-seven different WhatsApp messages.
-          </p>
-        </div>
-
-        <div className="border rounded-2xl p-6">
-          <h3 className="text-2xl font-semibold mb-3">
-            Expense Tracking
-          </h3>
-
-          <p>
-            Split expenses fairly so nobody suddenly develops
-            selective memory after the trip ends.
-          </p>
-        </div>
-
-        <div className="border rounded-2xl p-6">
-          <h3 className="text-2xl font-semibold mb-3">
-            Collaboration
-          </h3>
-
-          <p>
-            Invite friends, vote on plans, and keep everyone
-            updated in one place.
-          </p>
-        </div>
-      </section>
-
-      {/* Trips Preview */}
-      <section className="py-10">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-3xl font-bold">
-            Upcoming Trips
-          </h2>
-
-          <button className="border px-4 py-2 rounded-lg">
-            View All
-          </button>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-5">
-
-          <div className="border rounded-2xl p-5">
-            <h3 className="text-xl font-semibold">Goa Trip</h3>
-
-            <p className="mt-2">
-              22 May 2026 - 25 May 2026
-            </p>
-
-            <p className="mt-4">
-              Members: 6
-            </p>
+          <div className="flex flex-wrap justify-center gap-6 md:gap-8">
+            {FOOTER_LINKS.map((link) => (
+              <a
+                key={link}
+                href="#"
+                className="text-on-tertiary-container text-xs font-medium uppercase tracking-widest opacity-80 hover:opacity-100 hover:text-secondary-fixed-dim transition-all"
+              >
+                {link}
+              </a>
+            ))}
           </div>
 
-          <div className="border rounded-2xl p-5">
-            <h3 className="text-xl font-semibold">Manali Escape</h3>
-
-            <p className="mt-2">
-              10 June 2026 - 15 June 2026
-            </p>
-
-            <p className="mt-4">
-              Members: 4
-            </p>
-          </div>
-
-          <div className="border rounded-2xl p-5">
-            <h3 className="text-xl font-semibold">Jaipur Weekend</h3>
-
-            <p className="mt-2">
-              3 July 2026 - 6 July 2026
-            </p>
-
-            <p className="mt-4">
-              Members: 5
-            </p>
-          </div>
-
+          <p className="text-on-surface-variant text-sm text-center md:text-right">
+            © 2024 Planora. Curated for the intentional traveler.
+          </p>
         </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t mt-16 pt-6 text-center">
-        <p>
-          Group Trip Planner © 2026
-        </p>
       </footer>
-
     </div>
   )
 }
 
-export default LandingPage
+export default LandingPage;
