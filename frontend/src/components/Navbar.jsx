@@ -4,12 +4,10 @@ const Navbar = ({ activePath = '' }) => {
   return (
     <nav className="bg-surface/80 backdrop-blur-xl fixed top-0 w-full z-50 border-b border-white/5 shadow-2xl flex justify-between items-center px-5 md:px-16 py-4 max-w-7xl mx-auto left-0 right-0">
       <Link to="/" className="no-underline">
-        <div className="font-display text-primary tracking-tighter text-[28px] md:text-[32px] font-bold">
-          Planora
-        </div>
+        <img src="/logo2.png" alt="Planora Logo" className="h-16" />
       </Link>
       <div className="hidden md:flex gap-8 items-center">
-        <a
+        {/* <a
           className={`font-body text-sm font-medium transition-colors duration-300 ${
             activePath === 'explore'
               ? 'text-primary border-b-2 border-primary pb-1 font-bold'
@@ -18,7 +16,7 @@ const Navbar = ({ activePath = '' }) => {
           href="#"
         >
           Explore
-        </a>
+        </a> */}
         <a
           className={`font-body text-sm font-medium transition-colors duration-300 ${
             activePath === 'my-trips'

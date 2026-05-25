@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react'
 import { motion } from 'motion/react'
 import { Link } from 'react-router-dom'
 
-const FOOTER_LINKS = ['Destinations', 'Journal', 'Concierge', 'Privacy']
-
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
   visible: { opacity: 1, y: 0 },
@@ -27,21 +25,7 @@ const LandingPage = () => {
         }`}
       >
         <div className="flex justify-between items-center px-5 md:px-16 py-4 max-w-7xl mx-auto">
-          <span className="font-display text-primary text-2xl md:text-3xl font-bold tracking-tighter">
-            Planora
-          </span>
-
-          <div className="hidden md:flex gap-8 items-center">
-            {['Explore', 'My Trips'].map((item) => (
-              <a
-                key={item}
-                href="#"
-                className="text-on-surface-variant text-sm font-semibold uppercase tracking-widest hover:text-primary transition-colors"
-              >
-                {item}
-              </a>
-            ))}
-          </div>
+          <img src="/logo2.png" alt="Planora Logo" className="h-20" />
 
           <Link to="/create-trip">
             <button className="gold-gradient text-on-primary px-6 py-3 rounded-full text-sm font-semibold tracking-wide border-none cursor-pointer flex items-center gap-2 transition-all hover:shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:-translate-y-0.5 active:scale-95">
@@ -53,7 +37,7 @@ const LandingPage = () => {
       </nav>
 
       {/* ── Hero ── */}
-      <section className="relative min-h-screen flex items-center justify-center animated-bg pt-24 px-5 md:px-16 overflow-hidden">
+      <section className="relative min-h-screen flex items-center justify-center animated-bg pt-24 mt-12 px-5 md:px-16 overflow-hidden pb-32">
         {/* Ambient glows */}
         <div className="absolute inset-0 pointer-events-none opacity-40">
           <div className="absolute top-1/4 left-10 w-64 h-64 rounded-full bg-primary/5 blur-[100px]" />
@@ -173,26 +157,14 @@ const LandingPage = () => {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="bg-surface-container-lowest py-12 border-t border-white/5 mt-32">
+      <footer className="bg-surface-container-lowest py-12 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-5 md:px-16 flex flex-col md:flex-row justify-between items-center gap-8">
           <span className="font-display text-primary text-2xl font-medium tracking-tighter">
             Planora
           </span>
 
-          <div className="flex flex-wrap justify-center gap-6 md:gap-8">
-            {FOOTER_LINKS.map((link) => (
-              <a
-                key={link}
-                href="#"
-                className="text-on-tertiary-container text-xs font-medium uppercase tracking-widest opacity-80 hover:opacity-100 hover:text-secondary-fixed-dim transition-all"
-              >
-                {link}
-              </a>
-            ))}
-          </div>
-
           <p className="text-on-surface-variant text-sm text-center md:text-right">
-            © 2024 Planora. Curated for the intentional traveler.
+            © {new Date().getFullYear()} Planora. Curated for the intentional traveler.
           </p>
         </div>
       </footer>

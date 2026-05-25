@@ -105,9 +105,7 @@ const CreateTrip = () => {
         </Link>
 
         <Link to="/" className="no-underline">
-          <span className="font-display text-primary text-3xl font-bold tracking-tighter">
-            Planora
-          </span>
+          <img src="/logo2.png" alt="Planora Logo" className="w-40" />
         </Link>
 
         {/* Spacer for centering */}
