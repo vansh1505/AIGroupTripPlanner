@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
 import { Link } from 'react-router-dom'
+import toast from 'react-hot-toast'
 
 const purposes = [
   { label: 'Friends Trip', icon: 'diversity_3' },
@@ -44,8 +45,10 @@ const CreateTrip = () => {
 
     try {
       await navigator.clipboard.writeText(shareUrl)
+      toast.success('Invite link copied to clipboard!')
     } catch (error) {
       console.error('Failed to copy link:', error)
+      toast.error('Failed to copy invite link.')
     }
   }
 
@@ -77,6 +80,7 @@ const CreateTrip = () => {
 
     const data = await response.json();
     setId(data.id);
+    toast.success('Journey manifested successfully!')
 
     setForm({
       creatorName: '',
@@ -90,7 +94,9 @@ const CreateTrip = () => {
     
   } catch (error) {
     console.error('Error creating trip:', error.message)
-    setError('Failed to connect to the server. Please try again.')
+    const errorMsg = 'Failed to connect to the server. Please try again.'
+    setError(errorMsg)
+    toast.error(errorMsg)
   }
 }
 

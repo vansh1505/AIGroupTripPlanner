@@ -131,6 +131,20 @@ const tripSchema = new mongoose.Schema({
     aiRecommendation: {
         type: Object,
         default: null
+    },
+    
+    votes: {
+        type: [{
+            voterName: {
+                type: String,
+                required: true
+            },
+            votedFor: {
+                type: String,
+                required: true
+            }
+        }],
+        default: []
     }
 }, { timestamps: true });
 

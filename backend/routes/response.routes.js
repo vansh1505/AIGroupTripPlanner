@@ -52,6 +52,9 @@ router.post('/:tripId/respond', async (req, res) => {
         });
     } catch (error) {
         console.error('Error submitting response:', error);
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: Object.values(error.errors).map(e => e.message).join(', ') });
+        }
         res.status(500).json({ message: 'Internal server error' });
     }
 })

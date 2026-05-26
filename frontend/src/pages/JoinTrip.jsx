@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import ReactMarkdown from 'react-markdown'
+import toast from 'react-hot-toast'
 
 const phaseNames = ['The Vibe', 'Rhythm & Style', 'Logistics', 'Curations']
 
@@ -73,7 +74,7 @@ const ImageCard = ({ src, label, active, onClick, icon }) => (
 const JoinTrip = () => {
   const { id } = useParams();
   const [currentStep, setCurrentStep] = useState(1)
-  const [submitted, setSubmitted] = useState(false)
+  const [submitted, setSubmitted] = useState(() => localStorage.getItem(`trip_submitted_${id}`) === 'true')
   const [error, setError] = useState('')
   const [isGeneratingAI, setIsGeneratingAI] = useState(false)
   const [currentLoadingStep, setCurrentLoadingStep] = useState(0)
@@ -84,7 +85,6 @@ const JoinTrip = () => {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/city-image?city=${city}`);
       const data = await response.json();
-      console.log('Fetched image URL:', data.image);
       setImgSrc(data.image);
     } catch (error) {
       console.error('Error fetching image:', error);
@@ -156,11 +156,13 @@ const JoinTrip = () => {
       }
 
       console.log(data);
+      toast.success("Preferences submitted successfully!");
       setSubmitted(true);
       
     } catch (err) {
       console.error(err);
       setError(err.message || 'Something went wrong.');
+      toast.error(err.message || 'Something went wrong.');
     }
   };
 
@@ -185,12 +187,14 @@ const JoinTrip = () => {
         throw new Error(data.message || 'Failed to generate AI summary');
       }
 
+      toast.success("AI Itinerary generated!");
       setTripData((prev) => ({
         ...prev,
         aiRecommendation: data.recommendation,
       }));
     } catch (error) {
       console.error('Error generating AI summary:', error);
+      toast.error(error.message || 'Failed to generate AI summary');
     } finally {
       clearInterval(interval);
       setIsGeneratingAI(false);
@@ -199,16 +203,16 @@ const JoinTrip = () => {
 
   const [formData, setFormData] = useState({
     name: '',
-    budget: 3500,
+    budget: 1000,
     budgetFlex: 'Moderate',
-    destTypes: ['Mountains', 'City', 'Nature'],
+    destTypes: ['City', 'Nature'],
     ageGroup: '26-35',
     travelStyle: 'Luxury',
     tripPace: 'Balanced',
     transport: 'Flight',
     stayPref: 'Hotel',
     foodPref: 'Any',
-    activities: ["Nightlife", "Trekking", "Shopping", "Camping", "Photography", "Relaxation", "Food Exploration"],
+    activities: ["Nightlife", "Trekking"],
   })
 
   const toggleArrayItem = (field, item) => {
@@ -231,7 +235,9 @@ const JoinTrip = () => {
     setError('');
     if (currentStep === 1) {
       if (!formData.name.trim()) {
-        setError('Please enter your name to continue.');
+        const errStr = 'Please enter your name to continue.';
+        setError(errStr);
+        toast.error(errStr);
         return;
       }
       
@@ -240,7 +246,9 @@ const JoinTrip = () => {
       );
       
       if (alreadyResponded) {
-        setError('A response with this name has already been submitted.');
+        const errStr = 'A response with this name has already been submitted.';
+        setError(errStr);
+        toast.error(errStr);
         return;
       }
     }
@@ -794,7 +802,7 @@ const JoinTrip = () => {
                                 'Relaxation',
                                 'Food Exploration',
                               ].map((opt) => {
-                                const id = opt.toLowerCase().split(' ')[0]
+                                const id = opt
                                 return (
                                   <Chip
                                     key={id}
@@ -929,10 +937,10 @@ const JoinTrip = () => {
               Thanks for sharing your preferences. The trip organizer will review everyone's responses and finalize the itinerary soon!
             </p>
             <button
-              onClick={() => setSubmitted(false)}
+              onClick={() => window.location.href = '/'}
               className="gold-gradient text-background px-6 py-3 rounded-lg font-body text-sm font-semibold uppercase tracking-wide transition-all hover:shadow-[0_0_15px_rgba(212,175,55,0.4)] hover:-translate-y-0.5 active:scale-95"
             >
-              Close
+              Back to Home
             </button>
           </div>
         </div>
