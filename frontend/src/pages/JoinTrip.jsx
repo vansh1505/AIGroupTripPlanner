@@ -82,7 +82,7 @@ const JoinTrip = () => {
 
   const fetchImage = async (city) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/city-image?city=${city}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/city-image?city=${city}`);
       const data = await response.json();
       console.log('Fetched image URL:', data.image);
       setImgSrc(data.image);

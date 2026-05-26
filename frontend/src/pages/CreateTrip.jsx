@@ -270,7 +270,7 @@ const CreateTrip = () => {
                 Dates
               </label>
 
-              <div className="flex flex-col md:flex-row gap-8 w-full">
+              <div className="flex flex-col md:flex-row gap-8 w-full mt-8">
                 <div className="relative group flex-1">
                   <input
                     id="start-date"
@@ -280,7 +280,7 @@ const CreateTrip = () => {
                     value={form.startDate}
                     onChange={(e) => setForm({ ...form, startDate: e.target.value })}
                     placeholder="Start Date"
-                    className="peer w-full bg-transparent border-0 border-b border-outline-variant font-display text-xl md:text-2xl text-on-surface py-4 placeholder-transparent focus:outline-none focus:ring-0 focus:border-primary transition-all duration-500 [color-scheme:dark]"
+                    className="peer w-full bg-transparent border-0 border-b border-outline-variant font-display text-xl md:text-2xl text-on-surface py-4 placeholder-transparent focus:outline-none focus:ring-0 focus:border-primary transition-all duration-500 scheme-dark] [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-8 [&::-webkit-calendar-picker-indicator]:h-8 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:z-10"
                   />
                   <label
                     htmlFor="start-date"
@@ -288,7 +288,7 @@ const CreateTrip = () => {
                   >
                     Start Date
                   </label>
-                  <div className="absolute right-0 top-4 text-on-surface-variant peer-focus:text-primary transition-colors duration-500 pointer-events-none">
+                  <div className="absolute right-0 top-4 text-on-surface-variant peer-focus:text-primary transition-colors duration-500 pointer-events-none z-0">
                     <span className="material-symbols-outlined text-2xl">calendar_today</span>
                   </div>
                   <div className="absolute bottom-0 left-0 w-full h-px bg-primary scale-x-0 peer-focus:scale-x-100 transition-transform duration-700 origin-left" />
@@ -303,7 +303,7 @@ const CreateTrip = () => {
                     value={form.endDate}
                     onChange={(e) => setForm({ ...form, endDate: e.target.value })}
                     placeholder="End Date"
-                    className="peer w-full bg-transparent border-0 border-b border-outline-variant font-display text-xl md:text-2xl text-on-surface py-4 placeholder-transparent focus:outline-none focus:ring-0 focus:border-primary transition-all duration-500 [color-scheme:dark]"
+                    className="peer w-full bg-transparent border-0 border-b border-outline-variant font-display text-xl md:text-2xl text-on-surface py-4 placeholder-transparent focus:outline-none focus:ring-0 focus:border-primary transition-all duration-500 scheme-dark [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-8 [&::-webkit-calendar-picker-indicator]:h-8 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:z-10"
                   />
                   <label
                     htmlFor="end-date"
@@ -311,7 +311,7 @@ const CreateTrip = () => {
                   >
                     End Date
                   </label>
-                  <div className="absolute right-0 top-4 text-on-surface-variant peer-focus:text-primary transition-colors duration-500 pointer-events-none">
+                  <div className="absolute right-0 top-4 text-on-surface-variant peer-focus:text-primary transition-colors duration-500 pointer-events-none z-0">
                     <span className="material-symbols-outlined text-2xl">calendar_today</span>
                   </div>
                   <div className="absolute bottom-0 left-0 w-full h-px bg-primary scale-x-0 peer-focus:scale-x-100 transition-transform duration-700 origin-left" />
